@@ -22,7 +22,12 @@ def lambda_handler(event, context):
             media = []
         finds.append({'id': str(idx), 'omekaData': omeka_data, 'media': media})
 
-    s3.put_object(Bucket='atg-hyap-data', Key='omeka.json', Body=json.dumps({'data': {'finds': finds}}))
+    s3.put_object(
+        Bucket='atg-hyap-data',
+        Key='omeka.json',
+        Body=json.dumps({'data': {'finds': finds}}),
+        ContentType='application/json'
+    )
     return {
         'statusCode': 200,
         'body': json.dumps('Omeka data dumped!')

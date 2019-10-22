@@ -9,18 +9,19 @@ def lambda_handler(event, context):
     finds = []
 
     for idx, item in enumerate(r.json()):
-        omeka_data = {
-            'omekaId': item['id'],
-            'externalURL': item['url'],
-        }
-        for text in item['element_texts']:
-            omeka_data[text['element']['name']] = text['text']
-        if item['files']['count'] > 0:
-            files = requests.get(item['files']['url'])
-            media = [{'urls': f['file_urls']} for f in files.json()]
-        else:
-            media = []
-        finds.append({'id': str(idx), 'omekaData': omeka_data, 'media': media})
+        if item['item_type'] and item['item_type']['name'] == "Archaeological Find":
+            omeka_data = {
+                'omekaId': item['id'],
+                'externalURL': item['url'],
+            }
+            for text in item['element_texts']:
+                omeka_data[text['element']['name']] = text['text']
+            if item['files']['count'] > 0:
+                files = requests.get(item['files']['url'])
+                media = [{'urls': f['file_urls']} for f in files.json()]
+            else:
+                media = []
+            finds.append({'id': str(idx), 'omekaData': omeka_data, 'media': media})
 
     s3.put_object(
         Bucket='atg-hyap-data',

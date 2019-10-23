@@ -18,7 +18,12 @@ def lambda_handler(event, context):
                 omeka_data[text['element']['name']] = text['text']
             if item['files']['count'] > 0:
                 files = requests.get(item['files']['url'])
-                media = [{'urls': f['file_urls']} for f in files.json()]
+                media = sorted(
+                    [{'urls': f['file_urls'], 'order': f['order']} for f in files.json()],
+                    key= lambda i: i['order'] if i['order'] else 100000
+                )
+                for m in media:
+                    del m['order']
             else:
                 media = []
             finds.append({'id': str(idx), 'omekaData': omeka_data, 'media': media})

@@ -6,6 +6,7 @@ def lambda_handler(event, context):
 
     s3 = boto3.client("s3")
     r = requests.get('http://anth1130.omeka.fas.harvard.edu/api/items/')
+    r.raise_for_status()
     finds = []
 
     for idx, item in enumerate(r.json()):
@@ -18,7 +19,14 @@ def lambda_handler(event, context):
                 omeka_data[text['element']['name']] = text['text']
             if item['files']['count'] > 0:
                 files = requests.get(item['files']['url'])
-                media = [{'urls': f['file_urls']} for f in files.json()]
+                files.raise_for_status()
+                media = sorted(
+                    [{'urls': f['file_urls'], 'order': f['order'], 'id': f['id']}
+                    for f in files.json()],
+                    key= lambda x: x['order'] if x['order'] else x['id']
+                )
+                for m in media:
+                    del m['order'], x['id']
             else:
                 media = []
             finds.append({'id': str(idx), 'omekaData': omeka_data, 'media': media})

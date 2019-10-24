@@ -26,7 +26,7 @@ def lambda_handler(event, context):
                     key= lambda x: x['order'] if x['order'] else x['id']
                 )
                 for m in media:
-                    del m['order'], x['id']
+                    del m['order'], m['id']
             else:
                 media = []
             finds.append({'id': str(idx), 'omekaData': omeka_data, 'media': media})
